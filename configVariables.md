@@ -1,0 +1,171 @@
+The config variable is **global STDClass $C**. It has no required property, so it is optional unless:
+  * You want hierarchy friendly urls (/parent/child)
+  * You want to enable development environment status [#Development](#Development.md) or you want to see the php errors ( default is live )
+  * You want to add another class directory [#classes\_dirs](#classes_dirs.md)
+  * You want to add a custom config variable (**note: array config variables will be converted to STDClass**)
+
+## Important Properties ##
+
+### path ###
+The path (url) of the application, **with trailing slash**
+
+eg. /add-adodb-admin/
+
+### environment\_status ###
+Environment Status (to be called application\_status on a future version) is a config property that switches various applications processes for proper handling on live or development status
+
+#### Live ####
+On "live" status, **all errors are not printed**. Programmatically, to check if the application is on this mode, use add::is\_live() method.
+
+For security purposes, **"live" is the default application status**.
+
+#### Development ####
+"development" status indicates that the only user of the application is the developer(s) themselves.
+
+Error reporting is set to E\_ALL and some debugging data will show on the end of the script. Mailed exceptions are also not mailed but instead echo'ed
+
+#### Development status on non-developer view ####
+Since 0.10.4 , "development" environment status is reverted to "live" when the user is not detected as a developer.
+
+#### Example use of add::is\_live() ####
+```
+<?php
+/**
+ * Register Controller Class
+ */
+CLASS ctrl_page_register EXTENDS ctrl_tpl_page {
+   protected $mode_gpc_register = array(
+         '_POST' => array('email','password')
+      );
+
+   /**
+    * Registration mode, checks the email first if the environment status is live
+    *
+    * @param array $gpc
+    *
+    */
+   public function process_mode_register($gpc) {
+      extract($gpc);
+
+
+
+      if (add::is_live()) {
+         filter_var($email, FILTER_VALIDATE_EMAIL);
+      }
+
+      member::add_new($gpc);
+
+   }
+}
+
+```
+
+
+### developer\_ips ###
+> An array of the ips of the developers of the application.
+
+> This is used on built in functions for security, and this can also be used within the application according to your requirements.
+
+example:
+```
+$C = array(
+      'environment_status' => 'development'
+      'developer_ips' => array('123.12.31.23','231.23.12.31')
+   );
+```
+
+Note: see [#Development\_status\_on\_non-developer\_view](#Development_status_on_non-developer_view.md)
+
+
+
+### classes\_dirs ###
+Array of class directories aside from your application's classes and framework's application classes directories.
+
+Good for having a class directory common for different applications.
+
+#### classes\_dirs example ####
+```
+$C = array(
+      'classes_dirs' => array( 
+            # First priority includes/classes relative the root directory of the application
+            'includes/classes',
+            # A directory of common classes among applications
+            '/var/www/my-common-php-classes/'
+         )
+   );
+```
+
+Note: the framework class directory is pushed on the end of the directory array.
+
+If the class is not found on the directory **or sub directories** of the class directory, the framework then tries again on the next class directory and so on, the last directory to be checked is the framework `/classes/` directory.
+
+
+### libs ###
+An array of libraries with there "alias" as the index and the path to the initialization path as value.
+
+```
+   $C = array(
+         /**
+          * Library init files
+          */
+         'libs'  => (object) array(
+               'adodb' => 'adodb/adodb.inc.php',
+               'smarty'    => 'smarty/Smarty.class.php',
+               'phpmailer' => 'phpmailer/class.phpmailer.php',
+            )
+      );
+```
+
+## Default Configs ##
+
+This is how the default config variables when you do not set them on your config variable.
+
+See Code: https://code.google.com/p/add-mvc-framework/source/browse/project/trunk/classes/add.class.php#106
+
+```
+   array(
+         'super_domain'       => $domain_parts['super_domain'], # extracted from server host
+         'sub_domain'         => $domain_parts['sub_domain'], # extracted from server host
+         'path'               => preg_replace('/\/[^\/]*?$/','/',$_SERVER['REQUEST_URI']),
+         'root_dir'           => realpath('./'),
+         'environment_status' => 'live',
+         'developer_ips'      => array(),
+
+         /**
+          * Library init files
+          */
+         'libs'  => (object) array(
+               'adodb' => 'adodb/adodb.inc.php',
+               'smarty'    => 'smarty/Smarty.class.php',
+               'phpmailer' => 'phpmailer/class.phpmailer.php',
+            ),
+         );
+```
+
+## Other Properties ##
+Here are other properties that could be automatically generated by the framework but can be of good use within your application
+
+  1. incs\_dir e.g. /var/www/forums/includes
+  1. classes\_dirs e.g. /var/www/forums/includes/classes
+  1. configs\_dir e.g. (deprecated[?]) /var/www/forums/includes/configs
+  1. views\_dir e.g. /var/www/forums/includes/views
+  1. caches\_dir e.g. /var/www/forums/includes/caches
+  1. assets\_dir e.g. /var/www/forums/includes/assets
+  1. images\_dir e.g. /var/www/forums/includes/images
+  1. css\_dir e.g. /var/www/forums/includes/css
+  1. js\_dir e.g. /var/www/forums/includes/js
+  1. domain e.g. www.add.ph
+  1. base\_url e.g. http://www.add.ph/forums/
+  1. assets\_path e.g. /forums/assets/
+  1. css\_path e.g. /forums/assets/css/
+  1. js\_path e.g. /forums/assets/js/
+  1. images\_path e.g. /forums/assets/images/
+  1. assets\_libs\_path e.g. /forums/assets/libs/
+
+## Usage ##<?php
+echo "welcome to ".add::config()->super_domain."<br />";
+
+echo "<a href='"
+
+
+Related: [gettingStarted Getting Started With ADD MVC Framework]```

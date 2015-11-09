@@ -1,0 +1,1 @@
+Discussion of this subject is moved to [Modes and Sub Modes Page](ModesAndSubModes.md)
